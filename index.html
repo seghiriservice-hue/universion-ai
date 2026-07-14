@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniVision AI — Smart University Room Management</title>
+  <meta name="description" content="AI-powered university room management with real-time camera recognition, automated attendance, live campus mapping, scheduling, and analytics.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-wrapper">
+    <!-- ==================== HEADER ==================== -->
+    <header id="main-header">
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <h1>UniVision<span>AI</span></h1>
+        </div>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>System Online</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <nav class="view-tabs" aria-label="Main views">
+          <button class="view-tab active" data-view="kiosk" id="tab-kiosk">🗺️ Entrance Map</button>
+          <button class="view-tab" data-view="admin" id="tab-admin">🛡️ Dashboard</button>
+          <button class="view-tab" data-view="schedule" id="tab-schedule">📅 Schedule</button>
+          <button class="view-tab" data-view="analytics" id="tab-analytics">📊 Analytics</button>
+          <button class="view-tab" data-view="professors" id="tab-professors">👥 Professors</button>
+          <button class="view-tab" data-view="designer" id="tab-designer">🎨 Designer</button>
+        </nav>
+      </div>
+      <div class="header-right">
+        <button class="header-icon-btn" id="btn-add-prof" aria-label="Add Professor" title="Register New Professor">➕</button>
+        <div class="header-icon-btn" id="btn-theme" role="button" tabindex="0" aria-label="Change Theme" title="Change App Color">
+          🎨
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-title">App Theme</div>
+            <button class="theme-option" data-theme="default"><span class="theme-swatch" style="background:linear-gradient(135deg,#00d4ff,#0ea5e9);"></span> Cyber Blue</button>
+            <button class="theme-option" data-theme="emerald"><span class="theme-swatch" style="background:linear-gradient(135deg,#00ff88,#10b981);"></span> Emerald Green</button>
+            <button class="theme-option" data-theme="purple"><span class="theme-swatch" style="background:linear-gradient(135deg,#a855f7,#7c3aed);"></span> Royal Purple</button>
+            <button class="theme-option" data-theme="rose"><span class="theme-swatch" style="background:linear-gradient(135deg,#ff3366,#e11d48);"></span> Rose Red</button>
+            <button class="theme-option" data-theme="amber"><span class="theme-swatch" style="background:linear-gradient(135deg,#f59e0b,#d97706);"></span> Amber Gold</button>
+            <button class="theme-option" data-theme="light"><span class="theme-swatch" style="background:linear-gradient(135deg,#f0f4ff,#e2e8f0);"></span> Light Mode</button>
+          </div>
+        </div>
+        <div class="header-icon-btn" id="btn-lang" role="button" tabindex="0" aria-label="Change Language" title="Change Language">
+          🌐
+          <div class="theme-dropdown" id="lang-dropdown">
+            <div class="theme-dropdown-title">Language / اللغة</div>
+            <button class="lang-option" data-lang="en">English (EN)</button>
+            <button class="lang-option" data-lang="ar">العربية (AR)</button>
+          </div>
+        </div>
+        <div class="header-icon-btn" id="header-btn-settings" role="button" tabindex="0" aria-label="Simulation Settings" title="Simulation Settings" style="font-size:1.1rem; display:flex; align-items:center; justify-content:center;">
+          ⚙️
+        </div>
+        <div style="position:relative;">
+          <button class="notif-bell" id="notif-bell" aria-label="Notifications">
+            🔔
+            <span class="notif-count hidden" id="notif-count">0</span>
+          </button>
+          <div class="notif-dropdown" id="notif-dropdown">
+            <div class="notif-dropdown-header">
+              <h4>Notifications</h4>
+              <button class="notif-mark-read" id="notif-mark-read">Mark all read</button>
+            </div>
+            <div class="notif-list" id="notif-list">
+              <div class="empty-state" id="notif-empty" style="padding:30px 20px;">
+                <div class="empty-icon">🔔</div>
+                <div>No notifications yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="system-clock"></div>
+      </div>
+    </header>
+
+    <!-- ==================== STATS BAR ==================== -->
+    <div id="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon icon-total">🏛️</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-total">12</span>
+          <span class="stat-label">Total Rooms</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-occupied">🔴</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-occupied">0</span>
+          <span class="stat-label">Occupied</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-vacant">🟢</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-vacant">12</span>
+          <span class="stat-label">Vacant</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-classes">📚</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-classes">0</span>
+          <span class="stat-label">Active Classes</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-profs">👤</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-professors">0</span>
+          <span class="stat-label">Professors Detected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main id="main-content">
+
+      <!-- =========== KIOSK MAP VIEW =========== -->
+      <!-- =========== KIOSK MAP VIEW =========== -->
+      <section id="kiosk-view" class="view active">
+        <div class="kiosk-header">
+          <h2 id="kiosk-title-h2">Science &amp; Engineering Wing — <span class="accent">Live Room Status</span></h2>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <select class="sim-select" id="select-kiosk-dept" style="width: auto; padding: 8px 32px 8px 16px; margin: 0; background-color: var(--bg-card); border-color: var(--border); font-weight: 600; font-size: 0.8rem; border-radius: var(--radius-md); height: 38px;">
+              <option value="science" id="opt-dept-science">Science &amp; Engineering Wing</option>
+              <option value="business" id="opt-dept-business">Business &amp; Humanities Wing</option>
+            </select>
+            <label class="kiosk-filter-btn" id="filter-free-label" style="height: 38px;">
+              <input type="checkbox" id="checkbox-filter-free" style="margin-right:6px; cursor:pointer;">
+              <span id="label-show-free">🟢 Show Free Only</span>
+            </label>
+            <div class="view-tabs" style="margin:0; height: 38px; align-items: center;">
+              <button class="view-tab active" id="btn-kiosk-grid" style="padding: 5px 14px; font-size: 0.78rem;">📋 <span id="label-view-grid">Cards</span></button>
+              <button class="view-tab" id="btn-kiosk-map" style="padding: 5px 14px; font-size: 0.78rem;">🗺️ <span id="label-view-blueprint">Blueprint</span></button>
+            </div>
+            <div class="search-bar">
+              <input type="text" id="map-search" placeholder="Search professor or room…" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Interactive blueprint section (hidden by default) -->
+        <div class="blueprint-section" id="kiosk-blueprint-container" style="display:none; flex-direction:column; gap:28px;">
+          <!-- GF Blueprint -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">GF</span><h3 id="label-gf-blue">Ground Floor — Blueprint</h3></div>
+            <div class="blueprint-wrapper" style="position:relative; width:100%; max-width:800px; margin:0 auto;">
+              <svg viewBox="0 0 500 150" class="blueprint-svg">
+                <g class="blueprint-room vacant" data-svg-room-id="reception">
+                  <rect x="10" y="10" width="110" height="90" rx="6" />
+                  <text x="65" y="55" class="blueprint-room-name">Reception</text>
+                  <text x="65" y="75" class="blueprint-room-status" id="svg-status-reception">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="lecture-a">
+                  <rect x="130" y="10" width="110" height="90" rx="6" />
+                  <text x="185" y="55" class="blueprint-room-name">Lecture A</text>
+                  <text x="185" y="75" class="blueprint-room-status" id="svg-status-lecture-a">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="lecture-b">
+                  <rect x="250" y="10" width="110" height="90" rx="6" />
+                  <text x="305" y="55" class="blueprint-room-name">Lecture B</text>
+                  <text x="305" y="75" class="blueprint-room-status" id="svg-status-lecture-b">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="staff-lounge">
+                  <rect x="370" y="10" width="110" height="90" rx="6" />
+                  <text x="425" y="55" class="blueprint-room-name">Staff Lounge</text>
+                  <text x="425" y="75" class="blueprint-room-status" id="svg-status-staff-lounge">Free</text>
+                </g>
+                <rect x="10" y="110" width="470" height="30" rx="4" fill="rgba(255,255,255,0.02)" stroke="var(--border)" stroke-dasharray="4 4" />
+                <text x="245" y="128" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)" text-anchor="middle">CORRIDOR / الممر</text>
+              </svg>
+            </div>
+          </div>
+          
+          <!-- 1F Blueprint -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">1F</span><h3 id="label-1f-blue">First Floor — Blueprint</h3></div>
+            <div class="blueprint-wrapper" style="position:relative; width:100%; max-width:800px; margin:0 auto;">
+              <svg viewBox="0 0 500 150" class="blueprint-svg">
+                <g class="blueprint-room vacant" data-svg-room-id="turing-101">
+                  <rect x="10" y="10" width="110" height="90" rx="6" />
+                  <text x="65" y="55" class="blueprint-room-name">Turing 101</text>
+                  <text x="65" y="75" class="blueprint-room-status" id="svg-status-turing-101">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="newton-102">
+                  <rect x="130" y="10" width="110" height="90" rx="6" />
+                  <text x="185" y="55" class="blueprint-room-name">Newton 102</text>
+                  <text x="185" y="75" class="blueprint-room-status" id="svg-status-newton-102">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="seminar-103">
+                  <rect x="250" y="10" width="110" height="90" rx="6" />
+                  <text x="305" y="55" class="blueprint-room-name">Seminar 103</text>
+                  <text x="305" y="75" class="blueprint-room-status" id="svg-status-seminar-103">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="darwin-104">
+                  <rect x="370" y="10" width="110" height="90" rx="6" />
+                  <text x="425" y="55" class="blueprint-room-name">Darwin 104</text>
+                  <text x="425" y="75" class="blueprint-room-status" id="svg-status-darwin-104">Free</text>
+                </g>
+                <rect x="10" y="110" width="470" height="30" rx="4" fill="rgba(255,255,255,0.02)" stroke="var(--border)" stroke-dasharray="4 4" />
+                <text x="245" y="128" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)" text-anchor="middle">CORRIDOR / الممر</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 2F Blueprint -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">2F</span><h3 id="label-2f-blue">Second Floor — Blueprint</h3></div>
+            <div class="blueprint-wrapper" style="position:relative; width:100%; max-width:800px; margin:0 auto;">
+              <svg viewBox="0 0 500 150" class="blueprint-svg">
+                <g class="blueprint-room vacant" data-svg-room-id="hawking-201">
+                  <rect x="10" y="10" width="110" height="90" rx="6" />
+                  <text x="65" y="55" class="blueprint-room-name">Hawking 201</text>
+                  <text x="65" y="75" class="blueprint-room-status" id="svg-status-hawking-201">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="einstein-202">
+                  <rect x="130" y="10" width="110" height="90" rx="6" />
+                  <text x="185" y="55" class="blueprint-room-name">Einstein 202</text>
+                  <text x="185" y="75" class="blueprint-room-status" id="svg-status-einstein-202">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="curie-203">
+                  <rect x="250" y="10" width="110" height="90" rx="6" />
+                  <text x="305" y="55" class="blueprint-room-name">Curie 203</text>
+                  <text x="305" y="75" class="blueprint-room-status" id="svg-status-curie-203">Free</text>
+                </g>
+                <g class="blueprint-room vacant" data-svg-room-id="conference-204">
+                  <rect x="370" y="10" width="110" height="90" rx="6" />
+                  <text x="425" y="55" class="blueprint-room-name">Conf 204</text>
+                  <text x="425" y="75" class="blueprint-room-status" id="svg-status-conference-204">Free</text>
+                </g>
+                <rect x="10" y="110" width="470" height="30" rx="4" fill="rgba(255,255,255,0.02)" stroke="var(--border)" stroke-dasharray="4 4" />
+                <text x="245" y="128" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)" text-anchor="middle">CORRIDOR / الممر</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="floor-plan" id="floor-plan-cards-container">
+          <!-- GROUND FLOOR -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">GF</span><h3>Ground Floor — Main Wing</h3></div>
+            <div class="rooms-grid">
+              <div class="room-card vacant" data-room-id="reception" id="room-reception">
+                <div class="room-top"><div><div class="room-name">Reception Hall</div><div class="room-type">Lobby</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">—</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-001</span>
+              </div>
+              <div class="room-card vacant" data-room-id="lecture-a" id="room-lecture-a">
+                <div class="room-top"><div><div class="room-name">Lecture Hall A</div><div class="room-type">Auditorium • 250 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">250</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-002</span>
+              </div>
+              <div class="room-card vacant" data-room-id="lecture-b" id="room-lecture-b">
+                <div class="room-top"><div><div class="room-name">Lecture Hall B</div><div class="room-type">Auditorium • 200 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">200</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-003</span>
+              </div>
+              <div class="room-card vacant" data-room-id="staff-lounge" id="room-staff-lounge">
+                <div class="room-top"><div><div class="room-name">Staff Lounge</div><div class="room-type">Faculty Area</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">30</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-004</span>
+              </div>
+            </div>
+          </div>
+          <!-- FIRST FLOOR -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">1F</span><h3>First Floor — Computer Science Wing</h3></div>
+            <div class="rooms-grid">
+              <div class="room-card vacant" data-room-id="turing-101" id="room-turing-101">
+                <div class="room-top"><div><div class="room-name">Turing Lab 101</div><div class="room-type">Computer Lab • 60 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">60</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-101</span>
+              </div>
+              <div class="room-card vacant" data-room-id="newton-102" id="room-newton-102">
+                <div class="room-top"><div><div class="room-name">Newton Lab 102</div><div class="room-type">Physics Lab • 45 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">45</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-102</span>
+              </div>
+              <div class="room-card vacant" data-room-id="seminar-103" id="room-seminar-103">
+                <div class="room-top"><div><div class="room-name">Seminar Room 103</div><div class="room-type">Seminar Hall • 35 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">35</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-103</span>
+              </div>
+              <div class="room-card vacant" data-room-id="darwin-104" id="room-darwin-104">
+                <div class="room-top"><div><div class="room-name">Darwin Room 104</div><div class="room-type">Tutorial Room • 25 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">25</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-104</span>
+              </div>
+            </div>
+          </div>
+          <!-- SECOND FLOOR -->
+          <div class="floor-section">
+            <div class="floor-label"><span class="floor-badge">2F</span><h3>Second Floor — Research Wing</h3></div>
+            <div class="rooms-grid">
+              <div class="room-card vacant" data-room-id="hawking-201" id="room-hawking-201">
+                <div class="room-top"><div><div class="room-name">Hawking Room 201</div><div class="room-type">Research Lab • 30 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">30</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-201</span>
+              </div>
+              <div class="room-card vacant" data-room-id="einstein-202" id="room-einstein-202">
+                <div class="room-top"><div><div class="room-name">Einstein Lab 202</div><div class="room-type">Advanced Physics • 40 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">40</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-202</span>
+              </div>
+              <div class="room-card vacant" data-room-id="curie-203" id="room-curie-203">
+                <div class="room-top"><div><div class="room-name">Curie Lab 203</div><div class="room-type">Chemistry Lab • 35 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">35</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-203</span>
+              </div>
+              <div class="room-card vacant" data-room-id="conference-204" id="room-conference-204">
+                <div class="room-top"><div><div class="room-name">Conference Room 204</div><div class="room-type">Board Room • 20 seats</div></div><div class="room-status-badge vacant"><span class="badge-dot"></span> Vacant</div></div>
+                <div class="room-details">
+                  <div class="room-detail-row"><span class="detail-icon">👥</span><span class="detail-label">Capacity</span><span class="detail-value">20</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">👤</span><span class="detail-label">Occupant</span><span class="detail-value occupant-name">None</span></div>
+                  <div class="room-detail-row"><span class="detail-icon">📖</span><span class="detail-label">Class</span><span class="detail-value class-name">—</span></div>
+                </div><span class="room-camera-tag">CAM-204</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========== ADMIN DASHBOARD VIEW =========== -->
+      <section id="admin-view" class="view">
+        <div class="admin-grid">
+          <div class="panel camera-panel">
+            <div class="panel-header"><h3><span class="panel-icon">📹</span> Live Camera Feeds</h3><span class="panel-badge" id="active-cams-badge">0 ACTIVE</span></div>
+            <div class="camera-grid" id="camera-grid">
+              <!-- Dynamically generated by JS -->
+            </div>
+          </div>
+          <div class="panel database-panel">
+            <div class="panel-header"><h3><span class="panel-icon">🗄️</span> Attendance Database</h3><span class="panel-badge" id="records-badge">0 Records</span></div>
+            <div class="panel-body">
+              <table id="attendance-table"><thead><tr><th>Timestamp</th><th>Room</th><th>Professor</th><th>Course</th><th>Status</th><th>Method</th></tr></thead><tbody id="attendance-body"></tbody></table>
+              <div class="empty-state" id="db-empty"><div class="empty-icon">🗄️</div><div>No attendance records yet. Use the simulation panel to generate entries.</div></div>
+            </div>
+          </div>
+          <div class="panel log-panel">
+            <div class="panel-header"><h3><span class="panel-icon">📋</span> System Event Log</h3><span class="panel-badge" id="log-badge">LIVE</span></div>
+            <div class="panel-body"><div id="system-log"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========== SCHEDULE VIEW =========== -->
+      <section id="schedule-view" class="view">
+        <div class="schedule-header">
+          <h2>Weekly Class Schedule — <span class="accent">Timetable &amp; Attendance</span></h2>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="sim-btn primary" id="btn-add-class" style="width: auto; padding: 8px 16px; margin: 0; font-size: 0.8rem; height: 38px; border-radius: var(--radius-md);">➕ Schedule Class</button>
+            <div class="schedule-day-nav" id="schedule-day-nav">
+              <!-- Day buttons generated by JS -->
+            </div>
+          </div>
+        </div>
+        <div class="schedule-grid-wrapper">
+          <div class="schedule-grid" id="schedule-grid">
+            <!-- Generated by JS -->
+          </div>
+          <div class="schedule-legend">
+            <div class="legend-item"><span class="legend-dot active"></span> Active (On-Time)</div>
+            <div class="legend-item"><span class="legend-dot late"></span> Late Arrival</div>
+            <div class="legend-item"><span class="legend-dot upcoming"></span> Upcoming</div>
+            <div class="legend-item"><span class="legend-dot completed"></span> Completed</div>
+            <div class="legend-item"><span class="legend-dot missed"></span> Missed / Absent</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========== ANALYTICS VIEW =========== -->
+      <section id="analytics-view" class="view">
+        <div class="analytics-header">
+          <h2>Performance Analytics — <span class="accent">Insights &amp; Trends</span></h2>
+        </div>
+        <div class="analytics-summary" id="analytics-summary">
+          <!-- Generated by JS -->
+        </div>
+        <div class="analytics-charts">
+          <div class="chart-panel">
+            <div class="chart-header">📈 Attendance Trend (7 Days)</div>
+            <div class="chart-body"><canvas id="chart-attendance-trend"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-header">📊 Room Utilization</div>
+            <div class="chart-body"><canvas id="chart-room-util"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-header">🎯 Professor Punctuality</div>
+            <div class="chart-body"><canvas id="chart-punctuality"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-header">🕐 Peak Hours Heatmap</div>
+            <div class="chart-body"><canvas id="chart-peak-hours"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========== PROFESSORS VIEW =========== -->
+      <section id="professors-view" class="view">
+        <div class="professors-header" style="margin-bottom: 24px;">
+          <h2 id="professors-title-h2">Faculty Directory — <span class="accent">Professors Profile</span></h2>
+        </div>
+        <div class="rooms-grid" id="professors-list-grid">
+          <!-- Generated by JS -->
+        </div>
+      </section>
+
+      <!-- =========== MAP DESIGNER VIEW =========== -->
+      <section id="designer-view" class="view">
+        <div class="designer-header" style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h2 id="designer-title-h2">College Map Designer — <span class="accent">Layout Editor</span></h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Define designed rooms on the left, then click Apply to load your custom department wing live.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="sim-btn success" id="btn-design-add" style="width:auto; margin:0; padding:8px 16px;">➕ Add Room</button>
+            <button class="sim-btn warning" id="btn-design-clear" style="width:auto; margin:0; padding:8px 16px;">🗑️ Clear Map</button>
+            <button class="sim-btn primary" id="btn-design-apply" style="width:auto; margin:0; padding:8px 16px;">💾 Apply &amp; Load Map</button>
+          </div>
+        </div>
+        
+        <div class="designer-layout" style="display:grid; grid-template-columns: 280px 1fr; gap:24px;">
+          <!-- Left: Toolbox & Room List -->
+          <div class="panel" style="padding:20px; display:flex; flex-direction:column; gap:16px; min-height:450px;">
+            <div class="sim-section-title">Design Parameters</div>
+            <div class="form-row">
+              <label class="form-label" for="design-room-name">Room Name</label>
+              <input class="form-input" type="text" id="design-room-name" placeholder="e.g. Science Lab 401" style="background-color: var(--bg-primary);">
+            </div>
+            <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>
+                <label class="form-label" for="design-room-floor">Floor</label>
+                <select class="sim-select" id="design-room-floor" style="background-color: var(--bg-primary);">
+                  <option value="GF">GF</option>
+                  <option value="1F">1F</option>
+                  <option value="2F">2F</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" for="design-room-cap">Capacity</label>
+                <input class="form-input" type="number" id="design-room-cap" placeholder="30" min="5" max="500" style="background-color: var(--bg-primary);">
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="design-room-type">Room Type</label>
+              <select class="sim-select" id="design-room-type" style="background-color: var(--bg-primary);">
+                <option value="Classroom">Classroom</option>
+                <option value="Computer Lab">Computer Lab</option>
+                <option value="Physics Lab">Physics Lab</option>
+                <option value="Chemistry Lab">Chemistry Lab</option>
+                <option value="Auditorium">Auditorium</option>
+                <option value="Board Room">Board Room</option>
+                <option value="Study Room">Study Room</option>
+                <option value="Lobby">Lobby</option>
+              </select>
+            </div>
+            <div class="sim-divider"></div>
+            <div class="sim-section-title">Rooms in Custom Layout</div>
+            <div id="designer-room-list" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:220px; padding-right:4px;">
+              <div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:20px 0;">No rooms added yet. Configure parameters and click Add Room.</div>
+            </div>
+          </div>
+          
+          <!-- Right: Grid Workspace -->
+          <div class="panel" style="padding:20px; display:flex; flex-direction:column;">
+            <div class="sim-section-title" style="margin-bottom:12px; align-self: flex-start;">Visual Layout Map Preview (Arranged Rooms)</div>
+            <div id="designer-grid-workspace" style="position:relative; width:100%; height:450px; background:var(--bg-primary); border:2px dashed var(--border); border-radius:12px; display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px; padding:20px; overflow-y:auto; content-visibility: auto;">
+              <!-- Visual elements generated dynamically in JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section id="blank-designer-section" class="view" style="display:none;"></section>
+
+    </main>
+
+    <!-- ==================== ROOM DETAIL MODAL ==================== -->
+    <div class="modal-backdrop" id="room-modal">
+      <div class="modal">
+        <div class="modal-header"><h3 id="modal-room-name">Room Name</h3><button class="modal-close" id="modal-close" aria-label="Close modal">✕</button></div>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- ==================== ADD PROFESSOR MODAL ==================== -->
+    <div class="modal-backdrop" id="add-prof-modal">
+      <div class="modal" style="max-width:500px;">
+        <div class="modal-header">
+          <h3>➕ Register New Professor</h3>
+          <button class="modal-close" id="add-prof-close" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="add-prof-form" autocomplete="off">
+            <div class="form-row">
+              <label class="form-label" for="prof-name">Full Name *</label>
+              <input class="form-input" type="text" id="prof-name" placeholder="e.g. Dr. John Smith" required>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="prof-dept">Department *</label>
+              <input class="form-input" type="text" id="prof-dept" placeholder="e.g. Computer Science" required>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="prof-course">Primary Course *</label>
+              <input class="form-input" type="text" id="prof-course" placeholder="e.g. Data Structures" required>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="prof-photo">Photo (optional)</label>
+              <div class="form-file-wrap">
+                <input class="form-input" type="file" id="prof-photo" accept="image/*">
+                <div class="form-preview" id="prof-photo-preview"></div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="form-btn cancel" id="add-prof-cancel">Cancel</button>
+              <button type="submit" class="form-btn submit">✓ Register Professor</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ADD CLASS MODAL ==================== -->
+    <div class="modal-backdrop" id="add-class-modal">
+      <div class="modal" style="max-width:500px;">
+        <div class="modal-header">
+          <h3 id="add-class-title-h3">➕ Schedule New Class</h3>
+          <button class="modal-close" id="add-class-close" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="add-class-form" autocomplete="off">
+            <div class="form-row">
+              <label class="form-label" for="class-course" id="label-class-course">Course Name *</label>
+              <input class="form-input" type="text" id="class-course" placeholder="e.g. Introduction to Physics" required>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="class-professor" id="label-class-professor">Professor *</label>
+              <select class="sim-select" id="class-professor" required style="background-color: var(--bg-primary);"></select>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="class-room" id="label-class-room">Room *</label>
+              <select class="sim-select" id="class-room" required style="background-color: var(--bg-primary);"></select>
+            </div>
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="form-label" for="class-day" id="label-class-day">Day *</label>
+                <select class="sim-select" id="class-day" required style="background-color: var(--bg-primary);">
+                  <option value="0">Saturday</option>
+                  <option value="1">Sunday</option>
+                  <option value="2">Monday</option>
+                  <option value="3">Tuesday</option>
+                  <option value="4">Wednesday</option>
+                  <option value="5">Thursday</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" for="class-start" id="label-class-start">Start Time *</label>
+                <select class="sim-select" id="class-start" required style="background-color: var(--bg-primary);">
+                  <option value="8.0">08:00</option>
+                  <option value="9.5">09:30</option>
+                  <option value="11.0">11:00</option>
+                  <option value="12.5">12:30</option>
+                  <option value="14.0">14:00</option>
+                  <option value="15.5">15:30</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="class-duration" id="label-class-duration">Duration *</label>
+              <select class="sim-select" id="class-duration" required style="background-color: var(--bg-primary);">
+                <option value="1.5">1.5 Hours</option>
+                <option value="3.0">3.0 Hours (Double Slot)</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="form-btn cancel" id="add-class-cancel">Cancel</button>
+              <button type="submit" class="form-btn submit" id="btn-submit-class">✓ Schedule Class</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div id="toast-container"></div>
+
+    <!-- ==================== SIMULATION PANEL ==================== -->
+    <aside id="sim-panel">
+      <div class="sim-panel-title"><span class="title-icon">⚙️</span> Simulation Controls</div>
+      <div class="sim-section">
+        <div class="sim-section-title">Select Target</div>
+        <label class="sim-label" for="sim-professor">Professor</label>
+        <select class="sim-select" id="sim-professor"></select>
+        <label class="sim-label" for="sim-room">Room</label>
+        <select class="sim-select" id="sim-room"></select>
+      </div>
+      <div class="sim-divider"></div>
+      <div class="sim-section">
+        <div class="sim-section-title">Actions</div>
+        <button class="sim-btn primary" id="btn-sim-enter">🚪 Simulate Professor Entry</button>
+        <button class="sim-btn danger" id="btn-sim-exit">🚶 Simulate Professor Exit</button>
+      </div>
+      <div class="sim-divider"></div>
+      <div class="sim-section">
+        <div class="sim-section-title">Webcam Check-In Scanner</div>
+        <button class="sim-btn success" id="btn-webcam-toggle" style="background: linear-gradient(135deg, var(--emerald), #02a356);">📷 Live Webcam Check-in</button>
+        <div id="webcam-scan-container" style="display:none; flex-direction:column; gap:12px; margin-top:12px; text-align:center;">
+          <div style="position:relative; width:150px; height:150px; margin:0 auto; border-radius:50%; border:3px solid var(--border); overflow:hidden; box-shadow:0 0 15px rgba(0,212,255,0.25);">
+            <video id="webcam-video" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1); display:block;"></video>
+            <canvas id="webcam-overlay-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+            <div class="radar-scan-line" style="position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(to right, transparent, var(--cyan), transparent); pointer-events:none;"></div>
+          </div>
+          <div id="webcam-diagnostic" style="font-size:0.68rem; font-family:var(--font-mono); color:var(--text-muted); line-height:1.4;">Diagnostics: Standby</div>
+        </div>
+      </div>
+      <div class="sim-divider"></div>
+      <div class="sim-section">
+        <div class="sim-section-title">Security</div>
+        <button class="sim-btn warning" id="btn-sim-unknown">⚠️ Unrecognized Person</button>
+      </div>
+      <div class="sim-divider"></div>
+      <div class="sim-section">
+        <div class="sim-section-title">Management</div>
+        <button class="sim-btn success" id="btn-sim-add-prof">➕ Add New Professor</button>
+      </div>
+      <div class="sim-divider"></div>
+      <div class="sim-section">
+        <div class="sim-section-title">Quick Actions</div>
+        <button class="sim-btn" id="btn-sim-reset">🔄 Reset All Rooms</button>
+        <button class="sim-btn" id="btn-sim-demo">🎬 Run Full Demo</button>
+      </div>
+    </aside>
+    <button id="sim-toggle" aria-label="Toggle simulation panel" title="Simulation Controls">⚙️</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
